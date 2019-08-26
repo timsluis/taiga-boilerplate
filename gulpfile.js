@@ -4,65 +4,51 @@ var postcss = require('gulp-postcss')
 var cssnano = require('gulp-cssnano')
 var atImport = require('postcss-import')
 var cssnext = require('postcss-cssnext')
-var nunjucks = require('gulp-nunjucks')
 var browserSync = require('browser-sync').create()
 var modRewrite  = require('connect-modrewrite')
 var del = require('del');
 var debounce = require('lodash/debounce');
+var nunjucks = require('gulp-nunjucks');
 var debouncedReload = debounce(browserSync.reload, 200)
 
-gulp.task('default', ['clean', 'serve'])
+// gulp.task('default', ['clean', 'serve'])
 
-gulp.task('serve', ['build', 'watch'], function() {
-  browserSync.init({
-    server: {
-      baseDir: "./dist/",
-      serveStaticOptions: {
-        extensions: ['html']
-      }
-    },
-    open: false
-  });
-  gulp.watch('dist/**/*').on('change', debouncedReload)
-})
+// gulp.task('watch', function() {
+//   gulp.watch('src/**/*.html', ['html'])
+//   gulp.watch('src/**/*.css', ['css'])
+//   gulp.watch('src/assets/images/**/*', ['images'])
+//   gulp.watch('src/assets/media/**/*', ['media'])
+//   gulp.watch('src/assets/scripts/**/*', ['scripts'])
+// })
 
-gulp.task('watch', function() {
-  gulp.watch('src/**/*.html', ['html'])
-  gulp.watch('src/**/*.css', ['css'])
-  gulp.watch('src/assets/images/**/*', ['images'])
-  gulp.watch('src/assets/media/**/*', ['media'])
-  gulp.watch('src/assets/scripts/**/*', ['scripts'])
-})
-
-gulp.task('build', ['html', 'css', 'scripts', 'images', 'media'])
-
-gulp.task('clean', function(cb) {
-  // return del('dist');
-});
-
-gulp.task('html', () =>
-  gulp.src('src/**/*.html')
+function html() {
+  return gulp
+    .src('src/*.html')
    .pipe(nunjucks.compile())
-   .pipe(gulp.dest('dist'))
-)
+   .pipe(gulp.dest('.'))
+}
 
-gulp.task('images', () =>
-  gulp.src('src/assets/images/*')
-    .pipe(gulp.dest('dist/assets/images'))
-)
 
-gulp.task('media', () =>
-  gulp.src('src/assets/media/**/*')
-    .pipe(gulp.dest('dist/assets/media'))
-)
+function images() {
+  return gulp
+    .src('src/assets/images/*')
+    .pipe(gulp.dest('dist/images'))
+}
 
-gulp.task('scripts', () =>
-  gulp.src('src/assets/scripts/*')
-    .pipe(gulp.dest('dist/assets/scripts'))
-)
+function media() {
+  return gulp
+    .src('src/assets/media/**/*')
+    .pipe(gulp.dest('dist/media'))
+}
 
-gulp.task("css", function() {
-  var processors = [
+function scripts() {
+  return gulp
+    .src('src/assets/scripts/*')
+    .pipe(gulp.dest('dist/scripts'))
+}
+
+async function css() {
+    var processors = [
     atImport,
     cssnext({
       features: {
@@ -71,10 +57,28 @@ gulp.task("css", function() {
       }
     }),
   ]
-  gulp.src(['src/assets/stylesheets/styles.css', 'src/assets/stylesheets/styleguide.css'])
+
+  return gulp
+    .src(['src/assets/stylesheets/styles.css'])
     .pipe(sourcemaps.init())
+    .pipe(postcss(atImport))
     .pipe(postcss(processors))
     .pipe(cssnano())
     .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest('dist/assets/stylesheets'))
-})
+    .pipe(gulp.dest('dist/stylesheets'))
+}
+
+function clean() {
+  return del('dist');
+}
+
+exports.html = html;
+exports.images = images;
+exports.media = media;
+exports.scripts = scripts;
+exports.css = css;
+exports.clean = clean;
+
+gulp.task('build', gulp.series(
+    html, clean, css, images, media, scripts
+));
