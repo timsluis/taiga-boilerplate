@@ -12,8 +12,8 @@
     "gulp-postcss": "latest",
     "gulp-sourcemaps": "latest",
     "lodash": "^4.17.15",
-    "postcss-cssnext": "latest",
-    "postcss-import": "latest"
+    "postcss-import": "latest",
+    "postcss-preset-env": "latest"
   },
   "dependencies": {
     "connect-modrewrite": "latest",

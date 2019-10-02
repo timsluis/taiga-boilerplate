@@ -3,7 +3,8 @@ var sourcemaps = require('gulp-sourcemaps')
 var postcss = require('gulp-postcss')
 var cssnano = require('gulp-cssnano')
 var atImport = require('postcss-import')
-var cssnext = require('postcss-cssnext')
+var postcssPresetEnv = require('postcss-preset-env');
+// var cssnext = require('postcss-cssnext')
 var browserSync = require('browser-sync').create()
 var modRewrite  = require('connect-modrewrite')
 var del = require('del');
@@ -50,10 +51,10 @@ function scripts() {
 async function css() {
     var processors = [
     atImport,
-    cssnext({
+    postcssPresetEnv({
+      stage: 0,
       features: {
-        filter: false,
-        autoprefixer: false
+        'color-mod-function': { unresolved: 'warn' }
       }
     }),
   ]
